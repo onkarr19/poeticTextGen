@@ -30,58 +30,58 @@ SEQUENCE_LENGTH = 60
 # Define the step size for moving through the 'text' to create sequences.
 STEP_SIZE = 4
 
-# # Initialize empty lists to store sequences and their corresponding next characters.
-# sequences = []
-# next_characters = []
+# Initialize empty lists to store sequences and their corresponding next characters.
+sequences = []
+next_characters = []
 
-# # Create sequences of characters by sliding a window of size 'SEQUENCE_LENGTH' with a 
-# # step size of 'STEP_SIZE' through the 'text'.
-# for i in range(0, len(text)-SEQUENCE_LENGTH, STEP_SIZE):
-#     sequences.append(text[i: i+SEQUENCE_LENGTH])
-#     next_characters.append(text[i+SEQUENCE_LENGTH])
-
-
-# # Initialize a numpy array 'x' to store the one-hot encoded sequences.
-# x = np.zeros((len(sequences), SEQUENCE_LENGTH, len(characters)), dtype=np.bool_)
-
-# # Initialize a numpy array 'y' to store the one-hot encoded next characters.
-# y = np.zeros((len(sequences), len(characters)), dtype=np.bool_)
-
-# # Loop through the sequences and one-hot encode the characters.
-# for i, sequence in enumerate(sequences):
-#     for j, char in enumerate(sequence):
-#         # Set the corresponding character's index to 1 in the 'x' array.
-#         x[i, j, char_to_index[char]] = 1
-#     # Set the corresponding next character's index to 1 in the 'y' array.
-#     y[i, char_to_index[next_characters[i]]] = 1
+# Create sequences of characters by sliding a window of size 'SEQUENCE_LENGTH' with a 
+# step size of 'STEP_SIZE' through the 'text'.
+for i in range(0, len(text)-SEQUENCE_LENGTH, STEP_SIZE):
+    sequences.append(text[i: i+SEQUENCE_LENGTH])
+    next_characters.append(text[i+SEQUENCE_LENGTH])
 
 
+# Initialize a numpy array 'x' to store the one-hot encoded sequences.
+x = np.zeros((len(sequences), SEQUENCE_LENGTH, len(characters)), dtype=np.bool_)
 
-# # Create a Sequential model for a character-level text generation task.
+# Initialize a numpy array 'y' to store the one-hot encoded next characters.
+y = np.zeros((len(sequences), len(characters)), dtype=np.bool_)
 
-# # Add an LSTM layer with 128 units, taking input sequences of length SEQUENCE_LENGTH 
-# # and with input features equal to the number of unique characters in the dataset.
-# model = Sequential()
-# model.add(LSTM(128, input_shape=(SEQUENCE_LENGTH, len(characters))))
+# Loop through the sequences and one-hot encode the characters.
+for i, sequence in enumerate(sequences):
+    for j, char in enumerate(sequence):
+        # Set the corresponding character's index to 1 in the 'x' array.
+        x[i, j, char_to_index[char]] = 1
+    # Set the corresponding next character's index to 1 in the 'y' array.
+    y[i, char_to_index[next_characters[i]]] = 1
 
-# # Add a Dense layer with as many units as there are unique characters in the dataset.
-# model.add(Dense(len(characters)))
 
-# # Apply a Softmax activation function to the Dense layer's output to obtain character probabilities.
-# model.add(Activation('Softmax'))
 
-# # Compile the model with categorical cross-entropy loss and RMSprop optimizer with a learning rate of 0.01.
-# model.compile(loss='categorical_crossentropy', optimizer=RMSprop(learning_rate=0.01))
+# Create a Sequential model for a character-level text generation task.
 
-# # Train the model using input data 'x' and target data 'y', with a batch size of 256 and for 4 epochs.
-# model.fit(x, y, batch_size=256, epochs=4)
+# Add an LSTM layer with 128 units, taking input sequences of length SEQUENCE_LENGTH 
+# and with input features equal to the number of unique characters in the dataset.
+model = Sequential()
+model.add(LSTM(128, input_shape=(SEQUENCE_LENGTH, len(characters))))
 
-# # Save the trained model to the specified directory for future use.
-# # model.save(os.path.join('../output', 'poetic_text.model'))
+# Add a Dense layer with as many units as there are unique characters in the dataset.
+model.add(Dense(len(characters)))
+
+# Apply a Softmax activation function to the Dense layer's output to obtain character probabilities.
+model.add(Activation('Softmax'))
+
+# Compile the model with categorical cross-entropy loss and RMSprop optimizer with a learning rate of 0.01.
+model.compile(loss='categorical_crossentropy', optimizer=RMSprop(learning_rate=0.01))
+
+# Train the model using input data 'x' and target data 'y', with a batch size of 256 and for 4 epochs.
+model.fit(x, y, batch_size=256, epochs=4)
+
+# Save the trained model to the specified directory for future use.
+# model.save(os.path.join('../output', 'poetic_text.model'))
 
 
 # Load the saved model for further use.
-model = load_model('../output/poetic_text.model')
+# model = load_model('../output/poetic_text.model')
 
 def sample(preds, temperature=1.0):
     """
